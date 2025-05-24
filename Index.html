@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM Selection Wizard - Find Your Perfect AI Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .wizard-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .step {
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .step.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .step-header {
+            margin-bottom: 30px;
+        }
+
+        .step-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #4a5568;
+            margin-bottom: 10px;
+        }
+
+        .step-subtitle {
+            color: #718096;
+            font-size: 1.1rem;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .option-card {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .option-card:hover {
+            border-color: #667eea;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.15);
+        }
+
+        .option-card.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .option-icon {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .option-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .option-description {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            line-height: 1.4;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f7fafc;
+            color: #4a5568;
+            border: 2px solid #e2e8f0;
+        }
+
+        .btn-secondary:hover {
+            background: #edf2f7;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 3px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+
+        .result-card {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .result-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .result-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .result-subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+
+        .features-list {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+
+        .features-list h3 {
+            color: #4a5568;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            color: #2d3748;
+        }
+
+        .feature-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .feature-icon {
+            color: #48bb78;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        .alternatives {
+            background: #f7fafc;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .alternatives h4 {
+            color: #4a5568;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .alt-option {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .alt-option:last-child {
+            margin-bottom: 0;
+        }
+
+        .alt-title {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 5px;
+        }
+
+        .alt-description {
+            font-size: 0.9rem;
+            color: #718096;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .wizard-container {
+                padding: 20px;
+            }
+            
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .buttons {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 LLM Selection Wizard</h1>
+            <p>Find the perfect AI assistant for your specific needs</p>
+        </div>
+
+        <div class="wizard-container">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+
+            <!-- Step 1: Primary Use Case -->
+            <div class="step active" id="step1">
+                <div class="step-header">
+                    <h2 class="step-title">What's your primary use case?</h2>
+                    <p class="step-subtitle">Choose the main type of tasks you'll be using AI for</p>
+                </div>
+                <div class="options-grid">
+                    <div class="option-card" data-value="writing">
+                        <span class="option-icon">✍️</span>
+                        <h3 class="option-title">Content Creation</h3>
+                        <p class="option-description">Writing articles, stories, marketing copy, social media posts</p>
+                    </div>
+                    <div class="option-card" data-value="coding">
+                        <span class="option-icon">💻</span>
+                        <h3 class="option-title">Programming & Development</h3>
+                        <p class="option-description">Code generation, debugging, technical documentation</p>
+                    </div>
+                    <div class="option-card" data-value="analysis">
+                        <span class="option-icon">📊</span>
+                        <h3 class="option-title">Data Analysis & Research</h3>
+                        <p class="option-description">Analyzing data, research assistance, summarizing information</p>
+                    </div>
+                    <div class="option-card" data-value="creative">
+                        <span class="option-icon">🎨</span>
+                        <h3 class="option-title">Creative Projects</h3>
+                        <p class="option-description">Image generation, creative writing, brainstorming ideas</p>
+                    </div>
+                    <div class="option-card" data-value="business">
+                        <span class="option-icon">💼</span>
+                        <h3 class="option-title">Business & Productivity</h3>
+                        <p class="option-description">Email drafting, meeting summaries, presentations</p>
+                    </div>
+                    <div class="option-card" data-value="learning">
+                        <span class="option-icon">🎓</span>
+                        <h3 class="option-title">Education & Learning</h3>
+                        <p class="option-description">Tutoring, explaining concepts, homework help</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Technical Requirements -->
+            <div class="step" id="step2">
+                <div class="step-header">
+                    <h2 class="step-title">What are your technical needs?</h2>
+                    <p class="step-subtitle">Help us understand your technical requirements</p>
+                </div>
+                <div class="options-grid">
+                    <div class="option-card" data-value="simple">
+                        <span class="option-icon">🚀</span>
+                        <h3 class="option-title">Simple & Fast</h3>
+                        <p class="option-description">Quick responses, easy to use, basic functionality</p>
+                    </div>
+                    <div class="option-card" data-value="advanced">
+                        <span class="option-icon">⚡</span>
+                        <h3 class="option-title">Advanced Features</h3>
+                        <p class="option-description">Complex reasoning, detailed analysis, specialized capabilities</p>
+                    </div>
+                    <div class="option-card" data-value="multimodal">
+                        <span class="option-icon">🔄</span>
+                        <h3 class="option-title">Multimodal</h3>
+                        <p class="option-description">Need to work with images, documents, or other media</p>
+                    </div>
+                    <div class="option-card" data-value="api">
+                        <span class="option-icon">🔗</span>
+                        <h3 class="option-title">API Integration</h3>
+                        <p class="option-description">Need to integrate into applications or workflows</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Budget & Usage -->
+            <div class="step" id="step3">
+                <div class="step-header">
+                    <h2 class="step-title">What's your budget and usage pattern?</h2>
+                    <p class="step-subtitle">This helps us recommend the most cost-effective option</p>
+                </div>
+                <div class="options-grid">
+                    <div class="option-card" data-value="free">
+                        <span class="option-icon">🆓</span>
+                        <h3 class="option-title">Free Tier</h3>
+                        <p class="option-description">Occasional use, budget-conscious, exploring AI</p>
+                    </div>
+                    <div class="option-card" data-value="light">
+                        <span class="option-icon">💰</span>
+                        <h3 class="option-title">Light Usage ($10-30/month)</h3>
+                        <p class="option-description">Regular personal use, small projects</p>
+                    </div>
+                    <div class="option-card" data-value="professional">
+                        <span class="option-icon">💳</span>
+                        <h3 class="option-title">Professional ($30-100/month)</h3>
+                        <p class="option-description">Daily professional use, business applications</p>
+                    </div>
+                    <div class="option-card" data-value="enterprise">
+                        <span class="option-icon">🏢</span>
+                        <h3 class="option-title">Enterprise (Custom pricing)</h3>
+                        <p class="option-description">Team usage, high volume, custom requirements</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results -->
+            <div class="step" id="results">
+                <div class="result-card">
+                    <div class="result-icon">🎯</div>
+                    <h2 class="result-title" id="recommendedModel">Loading...</h2>
+                    <p class="result-subtitle" id="recommendedReason">Analyzing your preferences...</p>
+                </div>
+
+                <div class="features-list">
+                    <h3>Why this recommendation?</h3>
+                    <div id="featuresList"></div>
+                </div>
+
+                <div class="alternatives">
+                    <h4>Alternative Options</h4>
+                    <div id="alternativesList"></div>
+                </div>
+            </div>
+
+            <div class="buttons">
+                <button class="btn btn-secondary" id="prevBtn" onclick="previousStep()">Previous</button>
+                <button class="btn btn-primary" id="nextBtn" onclick="nextStep()">Next</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        const totalSteps = 3;
+        let userChoices = {};
+
+        const recommendations = {
+            // Content Creation
+            'writing-simple-free': {
+                model: 'ChatGPT (GPT-3.5)',
+                reason: 'Perfect for basic content creation with good quality and free access',
+                features: ['Fast response times', 'Good writing quality', 'Free tier available', 'Easy to use interface'],
+                alternatives: [
+                    { name: 'Claude (Sonnet)', description: 'Better for longer content and creative writing' },
+                    { name: 'Google Gemini', description: 'Good free alternative with multimodal capabilities' }
+                ]
+            },
+            'writing-advanced-light': {
+                model: 'Claude Sonnet 4',
+                reason: 'Excellent for creative and long-form content with nuanced understanding',
+                features: ['Superior creative writing', 'Long context handling', 'Nuanced understanding', 'Great for editing'],
+                alternatives: [
+                    { name: 'GPT-4', description: 'Strong alternative with broad capabilities' },
+                    { name: 'Perplexity Pro', description: 'Great for research-backed content' }
+                ]
+            },
+            'writing-multimodal-professional': {
+                model: 'GPT-4 Turbo with Vision',
+                reason: 'Best for content creation involving images, documents, and multimedia',
+                features: ['Image analysis', 'Document processing', 'Multimodal input', 'High-quality output'],
+                alternatives: [
+                    { name: 'Claude Opus 4', description: 'Excellent writing with some multimodal features' },
+                    { name: 'Google Gemini Pro', description: 'Strong multimodal capabilities' }
+                ]
+            },
+
+            // Programming & Development
+            'coding-simple-free': {
+                model: 'GitHub Copilot (Free tier)',
+                reason: 'Integrated directly into your IDE with excellent code completion',
+                features: ['IDE integration', 'Real-time suggestions', 'Free for students/OSS', 'Multi-language support'],
+                alternatives: [
+                    { name: 'ChatGPT', description: 'Good for code explanations and debugging' },
+                    { name: 'Replit AI', description: 'Great for beginners with in-browser coding' }
+                ]
+            },
+            'coding-advanced-professional': {
+                model: 'Claude Sonnet 4',
+                reason: 'Exceptional code quality with strong reasoning and debugging capabilities',
+                features: ['Superior code quality', 'Excellent debugging', 'Architecture advice', 'Multiple languages'],
+                alternatives: [
+                    { name: 'GitHub Copilot Pro', description: 'Best IDE integration with GPT-4 power' },
+                    { name: 'Cursor Pro', description: 'AI-first code editor with advanced features' }
+                ]
+            },
+            'coding-api-enterprise': {
+                model: 'GPT-4 Turbo API',
+                reason: 'Most mature API with extensive tooling and enterprise features',
+                features: ['Robust API', 'Function calling', 'Fine-tuning options', 'Enterprise support'],
+                alternatives: [
+                    { name: 'Claude API', description: 'Excellent code quality with competitive pricing' },
+                    { name: 'Codium AI', description: 'Specialized for code testing and validation' }
+                ]
+            },
+
+            // Data Analysis & Research
+            'analysis-simple-free': {
+                model: 'Perplexity AI (Free)',
+                reason: 'Excellent for research with real-time web access and citations',
+                features: ['Real-time web search', 'Source citations', 'Free tier', 'Research-focused'],
+                alternatives: [
+                    { name: 'Google Gemini', description: 'Good for basic analysis with free access' },
+                    { name: 'ChatGPT', description: 'Solid general analysis capabilities' }
+                ]
+            },
+            'analysis-advanced-professional': {
+                model: 'Claude Opus 4',
+                reason: 'Superior analytical reasoning with ability to handle complex data relationships',
+                features: ['Deep analytical thinking', 'Complex reasoning', 'Large context window', 'Data interpretation'],
+                alternatives: [
+                    { name: 'GPT-4', description: 'Strong analytical capabilities with broader knowledge' },
+                    { name: 'Perplexity Pro', description: 'Best for research with premium features' }
+                ]
+            },
+            'analysis-multimodal-light': {
+                model: 'Google Gemini Pro',
+                reason: 'Great balance of analytical power and multimodal capabilities at reasonable cost',
+                features: ['Chart/graph analysis', 'Document processing', 'Good reasoning', 'Competitive pricing'],
+                alternatives: [
+                    { name: 'GPT-4 Vision', description: 'Superior image analysis but higher cost' },
+                    { name: 'Claude Sonnet', description: 'Better text analysis, limited multimodal' }
+                ]
+            },
+
+            // Creative Projects
+            'creative-simple-free': {
+                model: 'Google Gemini',
+                reason: 'Strong creative capabilities with free access and multimodal features',
+                features: ['Creative writing', 'Image generation ideas', 'Free access', 'Multimodal input'],
+                alternatives: [
+                    { name: 'ChatGPT', description: 'Good creative writing with DALL-E integration' },
+                    { name: 'Claude', description: 'Excellent creative writing quality' }
+                ]
+            },
+            'creative-advanced-professional': {
+                model: 'Claude Opus 4',
+                reason: 'Unmatched creative writing quality with deep understanding of narrative and style',
+                features: ['Superior creative writing', 'Style adaptation', 'Character development', 'Long-form content'],
+                alternatives: [
+                    { name: 'GPT-4', description: 'Strong creativity with image generation via DALL-E' },
+                    { name: 'Midjourney + ChatGPT', description: 'Best combo for visual + text creativity' }
+                ]
+            },
+            'creative-multimodal-light': {
+                model: 'ChatGPT Plus (GPT-4 + DALL-E)',
+                reason: 'Best integrated solution for text and image creation in one platform',
+                features: ['Text generation', 'Image creation', 'Integrated workflow', 'User-friendly interface'],
+                alternatives: [
+                    { name: 'Midjourney + Claude', description: 'Higher quality but requires multiple tools' },
+                    { name: 'Adobe Firefly + GPT', description: 'Professional creative suite integration' }
+                ]
+            },
+
+            // Business & Productivity
+            'business-simple-free': {
+                model: 'Microsoft Copilot (Free)',
+                reason: 'Integrated with Office suite for seamless productivity workflows',
+                features: ['Office integration', 'Email assistance', 'Free with limits', 'Familiar interface'],
+                alternatives: [
+                    { name: 'Google Bard', description: 'Good for general business tasks' },
+                    { name: 'ChatGPT', description: 'Versatile for various business applications' }
+                ]
+            },
+            'business-advanced-professional': {
+                model: 'GPT-4 (ChatGPT Pro)',
+                reason: 'Most comprehensive business capabilities with reliable performance',
+                features: ['Professional writing', 'Data analysis', 'Presentation help', 'Reliable uptime'],
+                alternatives: [
+                    { name: 'Claude Pro', description: 'Excellent for detailed business writing' },
+                    { name: 'Microsoft Copilot Pro', description: 'Best Office suite integration' }
+                ]
+            },
+            'business-api-enterprise': {
+                model: 'Azure OpenAI Service',
+                reason: 'Enterprise-grade security and compliance with Microsoft ecosystem integration',
+                features: ['Enterprise security', 'Compliance features', 'Azure integration', 'Custom deployment'],
+                alternatives: [
+                    { name: 'Google Cloud Vertex AI', description: 'Strong enterprise features with Google services' },
+                    { name: 'Amazon Bedrock', description: 'Multiple models with AWS integration' }
+                ]
+            },
+
+            // Education & Learning
+            'learning-simple-free': {
+                model: 'Khan Academy\'s Khanmigo',
+                reason: 'Specifically designed for education with safe learning environment',
+                features: ['Educational focus', 'Safe for students', 'Curriculum aligned', 'Free access'],
+                alternatives: [
+                    { name: 'ChatGPT', description: 'Versatile tutoring capabilities' },
+                    { name: 'Google Bard', description: 'Good for research and explanations' }
+                ]
+            },
+            'learning-advanced-light': {
+                model: 'Claude Sonnet 4',
+                reason: 'Excellent at explaining complex concepts with patience and clarity',
+                features: ['Clear explanations', 'Patient tutoring style', 'Step-by-step reasoning', 'Subject expertise'],
+                alternatives: [
+                    { name: 'GPT-4', description: 'Broad knowledge with good teaching abilities' },
+                    { name: 'Perplexity Pro', description: 'Great for research-based learning' }
+                ]
+            },
+            'learning-multimodal-professional': {
+                model: 'GPT-4 Vision',
+                reason: 'Can analyze diagrams, handwriting, and visual learning materials',
+                features: ['Visual learning support', 'Diagram analysis', 'Handwriting recognition', 'Multi-format help'],
+                alternatives: [
+                    { name: 'Google Gemini Pro', description: 'Good multimodal learning support' },
+                    { name: 'Claude + image tools', description: 'Excellent text explanation with basic visual support' }
+                ]
+            }
+        };
+
+        function updateProgress() {
+            const progress = (currentStep / totalSteps) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+        }
+
+        function nextStep() {
+            const currentStepElement = document.getElementById('step' + currentStep);
+            const selectedOption = currentStepElement.querySelector('.option-card.selected');
+            
+            if (!selectedOption && currentStep <= totalSteps) {
+                alert('Please select an option before continuing.');
+                return;
+            }
+
+            if (selectedOption) {
+                const stepKey = getStepKey(currentStep);
+                userChoices[stepKey] = selectedOption.dataset.value;
+            }
+
+            if (currentStep < totalSteps) {
+                currentStepElement.classList.remove('active');
+                currentStep++;
+                document.getElementById('step' + currentStep).classList.add('active');
+                updateProgress();
+                updateButtons();
+            } else {
+                // Show results
+                currentStepElement.classList.remove('active');
+                generateRecommendation();
+                document.getElementById('results').classList.add('active');
+                document.getElementById('nextBtn').style.display = 'none';
+                document.getElementById('prevBtn').textContent = 'Start Over';
+                document.getElementById('prevBtn').onclick = () => location.reload();
+            }
+        }
+
+        function previousStep() {
+            if (currentStep > 1) {
+                document.getElementById('step' + currentStep).classList.remove('active');
+                currentStep--;
+                document.getElementById('step' + currentStep).classList.add('active');
+                updateProgress();
+                updateButtons();
+            }
+        }
+
+        function updateButtons() {
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            prevBtn.style.display = currentStep === 1 ? 'none' : 'block';
+            nextBtn.textContent = currentStep === totalSteps ? 'Get Recommendation' : 'Next';
+        }
+
+        function getStepKey(step) {
+            const keys = ['useCase', 'technical', 'budget'];
+            return keys[step - 1];
+        }
+
+        function generateRecommendationKey() {
+            const { useCase, technical, budget } = userChoices;
+            
+            // Try exact match first
+            let key = `${useCase}-${technical}-${budget}`;
+            if (recommendations[key]) return key;
+            
+            // Try without budget
+            key = `${useCase}-${technical}`;
+            for (let recKey in recommendations) {
+                if (recKey.startsWith(key)) return recKey;
+            }
+            
+            // Try without technical
+            key = `${useCase}`;
+            for (let recKey in recommendations) {
+                if (recKey.startsWith(key)) return recKey;
+            }
+            
+            // Default fallback
+            return Object.keys(recommendations)[0];
+        }
+
+        function generateRecommendation() {
+            const key = generateRecommendationKey();
+            const recommendation = recommendations[key];
+            
+            if (!recommendation) {
+                // Fallback recommendation
+                document.getElementById('recommendedModel').textContent = 'ChatGPT (GPT-4)';
+                document.getElementById('recommendedReason').textContent = 'A versatile choice that works well for most use cases';
+                return;
+            }
+            
+            document.getElementById('recommendedModel').textContent = recommendation.model;
+            document.getElementById('recommendedReason').textContent = recommendation.reason;
+            
+            // Generate features list
+            const featuresList = document.getElementById('featuresList');
+            featuresList.innerHTML = '';
+            recommendation.features.forEach(feature => {
+                const featureDiv = document.createElement('div');
+                featureDiv.className = 'feature-item';
+                featureDiv.innerHTML = `<span class="feature-icon">✓</span> ${feature}`;
+                featuresList.appendChild(featureDiv);
+            });
+            
+            // Generate alternatives list
+            const alternativesList = document.getElementById('alternativesList');
+            alternativesList.innerHTML = '';
+            recommendation.alternatives.forEach(alt => {
+                const altDiv = document.createElement('div');
+                altDiv.className = 'alt-option';
+                altDiv.innerHTML = `
+                    <div class="alt-title">${alt.name}</div>
+                    <div class="alt-description">${alt.description}</div>
+                `;
+                alternativesList.appendChild(altDiv);
+            });
+        }
+
+        // Add click handlers for option cards
+        document.addEventListener('DOMContentLoaded', function() {
+            const optionCards = document.querySelectorAll('.option-card');
+            
+            optionCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    // Remove selected class from siblings
+                    const siblings = this.parentNode.querySelectorAll('.option-card');
+                    siblings.forEach(sibling => sibling.classList.remove('selected'));
+                    
+                    // Add selected class to clicked card
+                    this.classList.add('selected');
+                });
+            });
+            
+            updateProgress();
+            updateButtons();
+        });
+    </script>
+</body>
+</html>
